@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS authors (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    full_name text
+);
