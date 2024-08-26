@@ -1,16 +1,17 @@
 CREATE TABLE IF NOT EXISTS categories (
-    name VARCHAR(255) PRIMARY KEY
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
 );
 
 INSERT INTO categories (name)
 VALUES
-    ( 'romantikus'),
-    ( 'regény' ),
-    ( 'krimi' ),
+    ( 'romantic'),
+    ( 'novel' ),
+    ( 'crime' ),
     ( 'fantasy' ),
     ( 'humor' ),
     ( 'sci-fi' ),
-    ( 'kaland' ),
-    ( 'dráma' ),
-    ( 'mese' ),
-    ( 'ifjúsági' );
+    ( 'adventure' ),
+    ( 'drama' ),
+    ( 'fairy tale' ),
+    ( 'juvenile' );

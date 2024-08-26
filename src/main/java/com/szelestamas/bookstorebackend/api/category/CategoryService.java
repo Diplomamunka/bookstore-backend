@@ -3,6 +3,7 @@ package com.szelestamas.bookstorebackend.api.category;
 import com.szelestamas.bookstorebackend.api.category.domain.Category;
 import com.szelestamas.bookstorebackend.api.category.persistence.CategoryEntity;
 import com.szelestamas.bookstorebackend.api.category.persistence.CategoryRepository;
+import com.szelestamas.bookstorebackend.core.ResourceAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +17,19 @@ public class CategoryService {
         return categoryRepository.findAll().stream().map(CategoryEntity::toCategory).toList();
     }
 
-    public void deleteByName(String name) {
-        categoryRepository.deleteById(name);
+    public void deleteById(long id) {
+        categoryRepository.deleteById(id);
     }
 
     public Category newCategory(Category category) {
+        if (categoryRepository.findByName(category.name()).isPresent()) {
+            throw new ResourceAlreadyExistsException(category.name());
+        }
         CategoryEntity savedEntity = categoryRepository.save(CategoryEntity.of(category));
         return savedEntity.toCategory();
+    }
+
+    public Category findById(long id) {
+        return categoryRepository.findById(id).get().toCategory();
     }
 }

@@ -1,5 +1,5 @@
 package com.szelestamas.bookstorebackend.api.category.domain;
 
-public record Category(String name) {
+public record Category(Long id, String name) {
 
 }

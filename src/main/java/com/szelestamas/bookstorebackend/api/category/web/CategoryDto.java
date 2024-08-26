@@ -5,11 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 
 public record CategoryDto(@Length(min = 1, max = 255) @NotNull String name) {
-    public static CategoryDto of(Category category) {
-        return new CategoryDto(category.name());
-    }
-
     public Category convertTo() {
-        return new Category(name);
+        return new Category(null, name);
     }
 }

@@ -11,26 +11,31 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.List;
 
 @RestController
-@RequestMapping("/categories")
+@RequestMapping("api/categories")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> getAllCategories() {
-        return ResponseEntity.ok(categoryService.getAllCategories().stream().map(CategoryDto::of).toList());
+    public ResponseEntity<List<CategoryResource>> getAllCategories() {
+        return ResponseEntity.ok(categoryService.getAllCategories().stream().map(CategoryResource::of).toList());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryResource> getCategory(@PathVariable Long id) {
+        return ResponseEntity.ok(CategoryResource.of(categoryService.findById(id)));
     }
 
     @PutMapping
-    public ResponseEntity<CategoryDto> newCategory(@RequestBody @Valid CategoryDto category) {
+    public ResponseEntity<CategoryResource> newCategory(@RequestBody @Valid CategoryDto category) {
         Category createdCategory = categoryService.newCategory(category.convertTo());
-        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentServletMapping().path("/{name}").buildAndExpand(createdCategory.name()).toUri()).body(CategoryDto.of(createdCategory));
+        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdCategory.id()).toUri()).body(CategoryResource.of(createdCategory));
     }
 
-    @DeleteMapping("/{name}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable String name) {
-        categoryService.deleteByName(name);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        categoryService.deleteById(id);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
