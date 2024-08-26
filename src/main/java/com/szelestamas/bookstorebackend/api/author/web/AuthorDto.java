@@ -1,10 +1,12 @@
 package com.szelestamas.bookstorebackend.api.author.web;
 
 import com.szelestamas.bookstorebackend.api.author.domain.Author;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
-public record AuthorDto(@NotNull String fullName) {
+import java.util.ArrayList;
+
+public record AuthorDto(@NotBlank String fullName) {
     public Author convertTo() {
-        return new Author(0, fullName);
+        return new Author(null, fullName, new ArrayList<>());
     }
 }
