@@ -3,6 +3,8 @@ package com.szelestamas.bookstorebackend.api.author;
 import com.szelestamas.bookstorebackend.api.author.domain.Author;
 import com.szelestamas.bookstorebackend.api.author.persistence.AuthorEntity;
 import com.szelestamas.bookstorebackend.api.author.persistence.AuthorRepository;
+import com.szelestamas.bookstorebackend.api.book.domain.Book;
+import com.szelestamas.bookstorebackend.api.book.persistence.BookEntity;
 import com.szelestamas.bookstorebackend.core.ResourceAlreadyExistsException;
 import com.szelestamas.bookstorebackend.core.ResourceCannotBeDeletedException;
 import lombok.RequiredArgsConstructor;
@@ -22,36 +24,43 @@ public class AuthorService {
     }
 
     public Author getAuthorById(long id) {
-        Optional<AuthorEntity> author = authorRepository.findById(id);
-        if (author.isPresent()) {
-            return author.get().toAuthor();
-        } else {
-            throw new NoSuchElementException("Author not found");
-        }
+        AuthorEntity author = authorRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Author not found with id: " + id));
+        return author.toAuthor();
+    }
+
+    public List<Book> getAllBooks(long id) {
+        AuthorEntity author = authorRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Author not found with id: " + id));
+        return author.getBooks().stream().map(BookEntity::toBook).toList();
     }
 
     public Author newAuthor(Author author) {
-        if (authorRepository.findByFullName(author.getFullName()).isPresent()) {
-            throw new ResourceAlreadyExistsException(author.getFullName());
-        }
+        if (authorRepository.findByFullName(author.fullName()).isPresent())
+            throw new ResourceAlreadyExistsException(author.fullName());
         return authorRepository.save(AuthorEntity.of(author)).toAuthor();
     }
 
     public void deleteById(long id) {
-        if (!authorRepository.findById(id).get().getBooks().isEmpty()) {
+        Optional<AuthorEntity> author = authorRepository.findById(id);
+        if (author.isEmpty())
+            return;
+        if (!author.get().getBooks().isEmpty())
             throw new ResourceCannotBeDeletedException("Author still have books, cannot delete it.");
-        }
         authorRepository.deleteById(id);
     }
 
     public Author update(long id, Author author) {
-        Optional<AuthorEntity> authorEntity = authorRepository.findById(id);
-        if (authorEntity.isPresent()) {
-            AuthorEntity authorEntityToUpdate = authorEntity.get();
-            authorEntityToUpdate.setFullName(author.getFullName());
-            return authorRepository.save(authorEntityToUpdate).toAuthor();
-        } else {
-            throw new NoSuchElementException("Author not found");
-        }
+        AuthorEntity authorEntity = authorRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Author not found with id: " + id));
+        authorEntity.setFullName(author.fullName());
+        return authorRepository.save(authorEntity).toAuthor();
+    }
+
+    public Author findByFullName(String name) {
+        AuthorEntity author = authorRepository.findByFullName(name)
+                .orElseThrow(() -> new NoSuchElementException("Author not found: " + name));
+
+        return author.toAuthor();
     }
 }

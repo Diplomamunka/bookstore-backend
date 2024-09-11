@@ -1,21 +1,34 @@
 package com.szelestamas.bookstorebackend.api.book.web;
 
+import com.szelestamas.bookstorebackend.api.author.AuthorService;
+import com.szelestamas.bookstorebackend.api.author.domain.Author;
+import com.szelestamas.bookstorebackend.api.author.web.AuthorDto;
 import com.szelestamas.bookstorebackend.api.book.BookService;
 import com.szelestamas.bookstorebackend.api.book.domain.Book;
+import com.szelestamas.bookstorebackend.api.category.CategoryService;
+import com.szelestamas.bookstorebackend.api.category.domain.Category;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("api/books")
 @RequiredArgsConstructor
 public class BookController {
     private final BookService bookService;
+    private final AuthorService authorService;
+    private final CategoryService categoryService;
 
     @GetMapping
     public ResponseEntity<List<BookResource>> getAllBooks() {
@@ -29,25 +42,74 @@ public class BookController {
 
     @PutMapping
     public ResponseEntity<BookResource> newBook(@RequestBody @Valid BookDto book) {
-        Book createdBook = bookService.newBook(book.convertTo());
-        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdBook.getId()).toUri()).body(BookResource.of(createdBook));
+        List<Author> authors = findOrCreateAuthors(book.authors());
+        Category category = categoryService.findByName(book.category().name());
+        Book createdBook = bookService.newBook(book.convertTo(), category, authors);
+        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdBook.id()).toUri()).body(BookResource.of(createdBook));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<BookResource> updateBook(@PathVariable Long id, @RequestBody @Valid BookDto book) {
-        Book updatedBook = bookService.updateBook(id, book.convertTo());
+        List<Author> authors = findOrCreateAuthors(book.authors());
+        Category category = categoryService.findByName(book.category().name());
+        Book updatedBook = bookService.updateBook(id, book.convertTo(), category, authors);
         return ResponseEntity.ok(BookResource.of(updatedBook));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
-        bookService.deleteById(id);
-
-        return ResponseEntity.noContent().build();
+        try {
+            bookService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/{id}/image")
-    public ResponseEntity<String> uploadImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
-        return ResponseEntity.ok("asd");
+    public ResponseEntity<String> uploadImage(@PathVariable Long id, @RequestParam("image") MultipartFile file) {
+        if (!isFileContentIsGood(file.getContentType())) {
+            return ResponseEntity.badRequest().body("Invalid file type. Only JPEG, PNG, SVG and WEBP files are allowed.");
+        }
+        try {
+            bookService.saveFile(file.getInputStream(), id, file.getOriginalFilename());
+            return ResponseEntity.ok("File uploaded successfully: " + file.getOriginalFilename());
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/image")
+    public ResponseEntity<Resource> getImage(@PathVariable Long id) {
+        Resource resource;
+        String contentType;
+        try {
+            resource = bookService.getFileAsResource(id);
+            contentType = Files.probeContentType(Path.of(resource.getFilename()));
+        } catch (IOException e) {
+            throw new NoSuchElementException(e);
+        }
+        if (resource.exists() && resource.isReadable()) {
+            return ResponseEntity.ok()
+                    /*.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")*/
+                    .contentType(MediaType.parseMediaType(contentType)).body(resource);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    private boolean isFileContentIsGood(String contentType) {
+        return contentType.equals("image/jpeg") || contentType.equals("image/png") || contentType.equals("image/svg+xml")
+                || contentType.equals("image/webp");
+    }
+
+    private List<Author> findOrCreateAuthors(List<AuthorDto> authors) {
+        return authors.stream().map(author -> {
+            try {
+                return authorService.findByFullName(author.fullName());
+            } catch (NoSuchElementException e) {
+                return authorService.newAuthor(author.convertTo());
+            }
+        }).toList();
     }
 }

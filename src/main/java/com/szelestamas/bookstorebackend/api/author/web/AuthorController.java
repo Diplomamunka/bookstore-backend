@@ -2,6 +2,7 @@ package com.szelestamas.bookstorebackend.api.author.web;
 
 import com.szelestamas.bookstorebackend.api.author.AuthorService;
 import com.szelestamas.bookstorebackend.api.author.domain.Author;
+import com.szelestamas.bookstorebackend.api.book.web.BookResource;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,10 +27,15 @@ public class AuthorController {
         return ResponseEntity.ok(AuthorResource.of(authorService.getAuthorById(id)));
     }
 
+    @GetMapping("/{id}/books")
+    public ResponseEntity<List<BookResource>> getAllBooks(@PathVariable Long id) {
+        return ResponseEntity.ok(authorService.getAllBooks(id).stream().map(BookResource::of).toList());
+    }
+
     @PutMapping
     public ResponseEntity<AuthorResource> newAuthor(@RequestBody @Valid AuthorDto authorDto) {
         Author createdAuthor = authorService.newAuthor(authorDto.convertTo());
-        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdAuthor.getId()).toUri()).body(AuthorResource.of(createdAuthor));
+        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdAuthor.id()).toUri()).body(AuthorResource.of(createdAuthor));
     }
 
     @PutMapping("/{id}")

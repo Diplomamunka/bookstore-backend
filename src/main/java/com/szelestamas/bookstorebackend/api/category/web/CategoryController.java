@@ -1,5 +1,6 @@
 package com.szelestamas.bookstorebackend.api.category.web;
 
+import com.szelestamas.bookstorebackend.api.book.web.BookResource;
 import com.szelestamas.bookstorebackend.api.category.CategoryService;
 import com.szelestamas.bookstorebackend.api.category.domain.Category;
 import jakarta.validation.Valid;
@@ -24,6 +25,11 @@ public class CategoryController {
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResource> getCategory(@PathVariable Long id) {
         return ResponseEntity.ok(CategoryResource.of(categoryService.findById(id)));
+    }
+
+    @GetMapping("/{id}/books")
+    public ResponseEntity<List<BookResource>> getBooksByCategory(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryService.getAllBooks(id).stream().map(BookResource::of).toList());
     }
 
     @PutMapping

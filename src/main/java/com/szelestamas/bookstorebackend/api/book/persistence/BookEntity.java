@@ -3,6 +3,8 @@ package com.szelestamas.bookstorebackend.api.book.persistence;
 import com.szelestamas.bookstorebackend.api.author.domain.Author;
 import com.szelestamas.bookstorebackend.api.author.persistence.AuthorEntity;
 import com.szelestamas.bookstorebackend.api.book.domain.Book;
+import com.szelestamas.bookstorebackend.api.category.domain.Category;
+import com.szelestamas.bookstorebackend.api.category.persistence.CategoryEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,12 +31,14 @@ public class BookEntity {
 
     private int price;
 
-    private String category;
+    @ManyToOne
+    @JoinColumn(name = "category", referencedColumnName = "name")
+    private CategoryEntity category;
 
     @Column(name = "short_description")
     private String shortDescription;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany
     @JoinTable(
             name = "books_authors",
             joinColumns = { @JoinColumn(name = "book_id")},
@@ -52,39 +56,14 @@ public class BookEntity {
 
     private String icon;
 
-    public static BookEntity of(Book book) {
-        return new BookEntity(book.getId(), book.getTitle(), book.getPrice(), book.getCategory(), book.getShortDescription(),
-                book.getAuthors().stream().map(AuthorEntity::of).collect(Collectors.toSet()),
-                book.getDiscount(), book.isAvailable(), book.getReleaseDate(), book.getIcon());
+    public static BookEntity of(Book book, Category category, List<Author> authors) {
+        return new BookEntity(book.id(), book.title(), book.price(), CategoryEntity.of(category), book.shortDescription(),
+                authors.stream().map(AuthorEntity::of).collect(Collectors.toSet()),
+                book.discount(), book.available(), book.releaseDate(), null);
     }
 
     public Book toBook() {
-        Book book = new Book();
-        book.setId(id);
-        book.setTitle(title);
-        book.setPrice(price);
-        book.setCategory(category);
-        book.setShortDescription(shortDescription);
-        book.setIcon(icon);
-        book.setAvailable(available);
-        book.setReleaseDate(releaseDate);
-        book.setDiscount(discount);
-        ArrayList<Author> authors = new ArrayList<>();
-        this.authors.stream().map(author -> {
-            Author convertedAuthor = new Author();
-            convertedAuthor.setId(author.getId());
-            convertedAuthor.setFullName(author.getFullName());
-            convertedAuthor.setBooks(new ArrayList<>());
-            return convertedAuthor;
-        }).forEach(authors::add);
-        book.setAuthors(authors);
-        return book;
+        return new Book(id, title, price, category.toCategory(), shortDescription, discount,
+                authors.stream().map(AuthorEntity::toAuthor).toList(), available, releaseDate);
     }
-
-    /*
-    public Book toBook() {
-        return new Book(id, title, price, category, shortDescription, discount,
-                authors.stream().map(AuthorEntity::toAuthor).toList(), available, releaseDate, icon);
-    }
-     */
 }

@@ -1,11 +1,15 @@
 package com.szelestamas.bookstorebackend.api.category.persistence;
 
+import com.szelestamas.bookstorebackend.api.book.persistence.BookEntity;
 import com.szelestamas.bookstorebackend.api.category.domain.Category;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -20,8 +24,11 @@ public class CategoryEntity {
 
     private String name;
 
+    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
+    Set<BookEntity> books;
+
     public static CategoryEntity of(Category category) {
-        return new CategoryEntity(category.id(), category.name());
+        return new CategoryEntity(category.id(), category.name(), null);
     }
 
     public Category toCategory() {
