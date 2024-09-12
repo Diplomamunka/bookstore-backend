@@ -1,21 +1,28 @@
 package com.szelestamas.bookstorebackend.api.category.web;
 
+import com.szelestamas.bookstorebackend.api.book.BookService;
 import com.szelestamas.bookstorebackend.api.book.web.BookResource;
 import com.szelestamas.bookstorebackend.api.category.CategoryService;
 import com.szelestamas.bookstorebackend.api.category.domain.Category;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/categories")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
+    private final BookService bookService;
 
     @GetMapping
     public ResponseEntity<List<CategoryResource>> getAllCategories() {
@@ -43,5 +50,27 @@ public class CategoryController {
         categoryService.deleteById(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/books")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> deleteBooksByCategory(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        List<Long> failedDeletes = new ArrayList<>();
+        List<Long> successfulDeletes = new ArrayList<>();
+        categoryService.getAllBooks(id).forEach(book -> {
+            try {
+                bookService.deleteById(book.id());
+                successfulDeletes.add(book.id());
+            } catch (IOException ignored) {
+                failedDeletes.add(book.id());
+            }
+        });
+        if (failedDeletes.isEmpty())
+            return ResponseEntity.noContent().build();
+        response.put("message", "Some books could not be deleted");
+        response.put("failedDeletes", failedDeletes);
+        response.put("successfulDeletes", successfulDeletes);
+        return ResponseEntity.internalServerError().body(response);
     }
 }

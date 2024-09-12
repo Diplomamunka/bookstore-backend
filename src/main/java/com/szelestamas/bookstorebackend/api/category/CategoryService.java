@@ -1,16 +1,19 @@
 package com.szelestamas.bookstorebackend.api.category;
 
+import com.szelestamas.bookstorebackend.api.author.persistence.AuthorEntity;
 import com.szelestamas.bookstorebackend.api.book.domain.Book;
 import com.szelestamas.bookstorebackend.api.book.persistence.BookEntity;
 import com.szelestamas.bookstorebackend.api.category.domain.Category;
 import com.szelestamas.bookstorebackend.api.category.persistence.CategoryEntity;
 import com.szelestamas.bookstorebackend.api.category.persistence.CategoryRepository;
 import com.szelestamas.bookstorebackend.core.ResourceAlreadyExistsException;
+import com.szelestamas.bookstorebackend.core.ResourceCannotBeDeletedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,11 @@ public class CategoryService {
     }
 
     public void deleteById(long id) {
+        Optional<CategoryEntity> category = categoryRepository.findById(id);
+        if (category.isEmpty())
+            return;
+        if (!category.get().getBooks().isEmpty())
+            throw new ResourceCannotBeDeletedException("Category still have books, cannot delete it.");
         categoryRepository.deleteById(id);
     }
 

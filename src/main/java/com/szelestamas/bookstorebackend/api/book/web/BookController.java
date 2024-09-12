@@ -10,6 +10,7 @@ import com.szelestamas.bookstorebackend.api.category.domain.Category;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -87,11 +88,12 @@ public class BookController {
             resource = bookService.getFileAsResource(id);
             contentType = Files.probeContentType(Path.of(resource.getFilename()));
         } catch (IOException e) {
-            throw new NoSuchElementException(e);
+            return ResponseEntity.internalServerError().build();
         }
         if (resource.exists() && resource.isReadable()) {
             return ResponseEntity.ok()
-                    /*.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")*/
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename()
+                            .substring(resource.getFilename().indexOf('_') + 1) + "\"")
                     .contentType(MediaType.parseMediaType(contentType)).body(resource);
         } else {
             return ResponseEntity.notFound().build();

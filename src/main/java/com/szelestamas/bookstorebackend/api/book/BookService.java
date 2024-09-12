@@ -65,7 +65,7 @@ public class BookService {
         return bookRepository.save(bookEntity).toBook();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = IOException.class)
     public void deleteById(long id) throws IOException {
         Optional<BookEntity> book = bookRepository.findById(id);
         if (book.isEmpty())
