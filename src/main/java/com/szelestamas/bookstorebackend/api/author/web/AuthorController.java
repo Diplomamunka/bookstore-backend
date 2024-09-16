@@ -3,6 +3,7 @@ package com.szelestamas.bookstorebackend.api.author.web;
 import com.szelestamas.bookstorebackend.api.author.AuthorService;
 import com.szelestamas.bookstorebackend.api.author.domain.Author;
 import com.szelestamas.bookstorebackend.api.book.BookService;
+import com.szelestamas.bookstorebackend.api.book.domain.Book;
 import com.szelestamas.bookstorebackend.api.book.web.BookResource;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -60,25 +61,16 @@ public class AuthorController {
 
     @DeleteMapping("/{id}/books")
     @Transactional
-    public ResponseEntity<Map<String, Object>> deleteBooksByAuthor(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        List<Long> failedDeletes = new ArrayList<>();
-        List<Long> successfulDeletes = new ArrayList<>();
-        authorService.getAllBooks(id).forEach(book -> {
-            try {
-                if (book.authors().size() == 1) {
+    public ResponseEntity<Void> deleteBooksByAuthor(@PathVariable Long id) {
+        List<Book> books = authorService.getAllBooks(id);
+        try {
+            for (Book book : books) {
+                if (book.authors().size() == 1)
                     bookService.deleteById(book.id());
-                    successfulDeletes.add(book.id());
-                }
-            } catch (IOException ignored) {
-                failedDeletes.add(book.id());
             }
-        });
-        if (failedDeletes.isEmpty())
             return ResponseEntity.noContent().build();
-        response.put("message", "Some books could not be deleted");
-        response.put("failedDeletes", failedDeletes);
-        response.put("successfulDeletes", successfulDeletes);
-        return ResponseEntity.internalServerError().body(response);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

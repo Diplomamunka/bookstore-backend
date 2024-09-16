@@ -1,6 +1,7 @@
 package com.szelestamas.bookstorebackend.api.category.web;
 
 import com.szelestamas.bookstorebackend.api.book.BookService;
+import com.szelestamas.bookstorebackend.api.book.domain.Book;
 import com.szelestamas.bookstorebackend.api.book.web.BookResource;
 import com.szelestamas.bookstorebackend.api.category.CategoryService;
 import com.szelestamas.bookstorebackend.api.category.domain.Category;
@@ -54,23 +55,16 @@ public class CategoryController {
 
     @DeleteMapping("/{id}/books")
     @Transactional
-    public ResponseEntity<Map<String, Object>> deleteBooksByCategory(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        List<Long> failedDeletes = new ArrayList<>();
-        List<Long> successfulDeletes = new ArrayList<>();
-        categoryService.getAllBooks(id).forEach(book -> {
-            try {
+    public ResponseEntity<Void> deleteBooksByCategory(@PathVariable Long id) {
+        List<Book> books = categoryService.getAllBooks(id);
+
+        try {
+            for (Book book : books) {
                 bookService.deleteById(book.id());
-                successfulDeletes.add(book.id());
-            } catch (IOException ignored) {
-                failedDeletes.add(book.id());
             }
-        });
-        if (failedDeletes.isEmpty())
             return ResponseEntity.noContent().build();
-        response.put("message", "Some books could not be deleted");
-        response.put("failedDeletes", failedDeletes);
-        response.put("successfulDeletes", successfulDeletes);
-        return ResponseEntity.internalServerError().body(response);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

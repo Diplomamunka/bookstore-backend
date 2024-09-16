@@ -8,6 +8,7 @@ import com.szelestamas.bookstorebackend.api.book.persistence.BookEntity;
 import com.szelestamas.bookstorebackend.core.ResourceAlreadyExistsException;
 import com.szelestamas.bookstorebackend.core.ResourceCannotBeDeletedException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -53,6 +54,8 @@ public class AuthorService {
     public Author update(long id, Author author) {
         AuthorEntity authorEntity = authorRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Author not found with id: " + id));
+        if (authorRepository.exists(Example.of(AuthorEntity.of(author))))
+            throw new ResourceAlreadyExistsException("Author already exists with the name: " + author.fullName());
         authorEntity.setFullName(author.fullName());
         return authorRepository.save(authorEntity).toAuthor();
     }
