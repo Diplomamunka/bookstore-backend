@@ -13,6 +13,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -32,6 +33,7 @@ public class BookController {
     private final CategoryService categoryService;
 
     @GetMapping
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<BookResource>> getAllBooks() {
         return ResponseEntity.ok(bookService.getAllBooks().stream().map(BookResource::of).toList());
     }
@@ -42,6 +44,7 @@ public class BookController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<BookResource> newBook(@RequestBody @Valid BookDto book) {
         List<Author> authors = findOrCreateAuthors(book.authors());
         Category category = categoryService.findByName(book.category().name());
@@ -50,6 +53,7 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<BookResource> updateBook(@PathVariable Long id, @RequestBody @Valid BookDto book) {
         List<Author> authors = findOrCreateAuthors(book.authors());
         Category category = categoryService.findByName(book.category().name());
@@ -58,6 +62,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         try {
             bookService.deleteById(id);
@@ -68,6 +73,7 @@ public class BookController {
     }
 
     @PostMapping("/{id}/image")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<String> uploadImage(@PathVariable Long id, @RequestParam("image") MultipartFile file) {
         if (!isFileContentIsGood(file.getContentType())) {
             return ResponseEntity.badRequest().body("Invalid file type. Only JPEG, PNG, SVG and WEBP files are allowed.");
