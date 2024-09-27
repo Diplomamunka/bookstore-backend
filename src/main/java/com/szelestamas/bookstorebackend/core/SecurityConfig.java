@@ -4,7 +4,6 @@ import com.szelestamas.bookstorebackend.api.user.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -34,8 +33,6 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .logout(logout -> logout.logoutUrl("/api/auth/signout"))
-                .authorizeHttpRequests(authorize ->
-                        authorize.requestMatchers(HttpMethod.GET).permitAll())
                 .authenticationManager(authenticationManager).httpBasic(Customizer.withDefaults()).build();
     }
 

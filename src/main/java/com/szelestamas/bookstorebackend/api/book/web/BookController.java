@@ -33,7 +33,6 @@ public class BookController {
     private final CategoryService categoryService;
 
     @GetMapping
-    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<BookResource>> getAllBooks() {
         return ResponseEntity.ok(bookService.getAllBooks().stream().map(BookResource::of).toList());
     }

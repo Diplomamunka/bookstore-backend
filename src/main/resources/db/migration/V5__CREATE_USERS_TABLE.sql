@@ -5,3 +5,5 @@ CREATE TABLE IF NOT EXISTS USERS (
     last_name text,
     first_name text
 );
+
+INSERT INTO USERS VALUES ('adam.admin@bookstore.com', 'xxxx', 'ADMIN', 'Admin', 'Adam');
