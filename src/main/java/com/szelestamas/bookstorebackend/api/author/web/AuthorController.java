@@ -38,7 +38,7 @@ public class AuthorController {
         return ResponseEntity.ok(authorService.getAllBooks(id).stream().map(BookResource::of).toList());
     }
 
-    @PutMapping
+    @PostMapping
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<AuthorResource> newAuthor(@RequestBody @Valid AuthorDto authorDto) {
         Author createdAuthor = authorService.newAuthor(authorDto.convertTo());

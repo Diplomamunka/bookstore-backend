@@ -7,5 +7,5 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record Book(Long id, String title, int price, Category category, String shortDescription, int discount,
-                   List<Author> authors, boolean available, LocalDate releaseDate) {
+                   List<String> tags, List<Author> authors, boolean available, LocalDate releaseDate) {
 }

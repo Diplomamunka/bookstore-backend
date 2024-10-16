@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS bookmarks (
+    email text NOT NULL REFERENCES users(login) ON DELETE CASCADE,
+    book_id BIGINT NOT NULL REFERENCES books(id) ON DELETE CASCADE
+)

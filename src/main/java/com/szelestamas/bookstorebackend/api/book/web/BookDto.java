@@ -13,10 +13,10 @@ import java.util.List;
 
 public record BookDto(@NotBlank String title, @NotNull int price, @NotNull CategoryDto category, String shortDescription,
                       @Range(min = 0, max = 100) @NotNull int discount,
-                      @NotEmpty List<AuthorDto> authors,
+                      List<String> tags, @NotEmpty List<AuthorDto> authors,
                       @NotNull boolean available, LocalDate releaseDate) {
     public Book convertTo() {
         return new Book(null, title, price, category.convertTo(), shortDescription,
-                discount, authors.stream().map(AuthorDto::convertTo).toList(), available, releaseDate);
+                discount, tags, authors.stream().map(AuthorDto::convertTo).toList(), available, releaseDate);
     }
 }

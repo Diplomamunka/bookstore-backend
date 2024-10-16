@@ -38,7 +38,7 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getAllBooks(id).stream().map(BookResource::of).toList());
     }
 
-    @PutMapping
+    @PostMapping
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<CategoryResource> newCategory(@RequestBody @Valid CategoryDto category) {
         Category createdCategory = categoryService.newCategory(category.convertTo());

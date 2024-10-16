@@ -27,4 +27,8 @@ public class ErrorAdvice {
     @ExceptionHandler(ResourceCannotBeDeletedException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public String resourceCannotBeDeletedHandler(ResourceCannotBeDeletedException ex) {return ex.getMessage();}
+
+    @ExceptionHandler(NotEnoughAuthorization.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String notEnoughAuthorizationHandler(NotEnoughAuthorization ex) {return ex.getMessage();}
 }

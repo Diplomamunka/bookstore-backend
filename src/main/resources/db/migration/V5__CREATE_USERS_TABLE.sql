@@ -1,9 +1,7 @@
 CREATE TABLE IF NOT EXISTS USERS (
     login text PRIMARY KEY,
-    password text NOT NULL,
-    user_role varchar(25),
-    last_name text,
-    first_name text
+    password text,
+    user_role varchar(25) NOT NULL,
+    last_name text NOT NULL,
+    first_name text NOT NULL
 );
-
-INSERT INTO USERS VALUES ('adam.admin@bookstore.com', 'xxxx', 'ADMIN', 'Admin', 'Adam');

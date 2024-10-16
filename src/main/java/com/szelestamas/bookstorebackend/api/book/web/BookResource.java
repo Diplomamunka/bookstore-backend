@@ -8,10 +8,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record BookResource(long id, String title, int price, CategoryResource category, String shortDescription, int discount,
-                           List<AuthorResource> authors, boolean available, LocalDate releaseDate) {
+                           List<String> tags, List<AuthorResource> authors, boolean available, LocalDate releaseDate) {
     public static BookResource of(Book book) {
         return new BookResource(book.id(), book.title(), book.price(), CategoryResource.of(book.category()), book.shortDescription(),
-                book.discount(), book.authors().stream().map(AuthorResource::of).toList(),
+                book.discount(), book.tags(), book.authors().stream().map(AuthorResource::of).toList(),
                 book.available(), book.releaseDate());
     }
 }

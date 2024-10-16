@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,6 +39,11 @@ public class BookEntity {
     @Column(name = "short_description")
     private String shortDescription;
 
+    @ElementCollection
+    @CollectionTable(name = "book_tags", joinColumns = @JoinColumn(name = "book_id"))
+    @Column(name = "tag")
+    private Set<String> tags;
+
     @ManyToMany
     @JoinTable(
             name = "books_authors",
@@ -58,12 +64,12 @@ public class BookEntity {
 
     public static BookEntity of(Book book, Category category, List<Author> authors) {
         return new BookEntity(book.id(), book.title(), book.price(), CategoryEntity.of(category), book.shortDescription(),
-                authors.stream().map(AuthorEntity::of).collect(Collectors.toSet()),
+                new HashSet<>(book.tags()), authors.stream().map(AuthorEntity::of).collect(Collectors.toSet()),
                 book.discount(), book.available(), book.releaseDate(), null);
     }
 
     public Book toBook() {
         return new Book(id, title, price, category.toCategory(), shortDescription, discount,
-                authors.stream().map(AuthorEntity::toAuthor).toList(), available, releaseDate);
+                tags.stream().toList(), authors.stream().map(AuthorEntity::toAuthor).toList(), available, releaseDate);
     }
 }
