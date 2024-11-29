@@ -1,7 +1,7 @@
-CREATE TABLE IF NOT EXISTS USERS (
-    login text PRIMARY KEY,
-    password text,
-    user_role varchar(25) NOT NULL,
-    last_name text NOT NULL,
-    first_name text NOT NULL
+CREATE TABLE IF NOT EXISTS users (
+    login TEXT PRIMARY KEY,
+    password TEXT,
+    user_role VARCHAR(25) NOT NULL,
+    last_name TEXT NOT NULL,
+    first_name TEXT NOT NULL
 );

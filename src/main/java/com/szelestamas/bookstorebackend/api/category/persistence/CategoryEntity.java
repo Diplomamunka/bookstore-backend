@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Setter
@@ -25,7 +24,7 @@ public class CategoryEntity {
     private String name;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
-    Set<BookEntity> books;
+    private Set<BookEntity> books;
 
     public static CategoryEntity of(Category category) {
         return new CategoryEntity(category.id(), category.name(), null);

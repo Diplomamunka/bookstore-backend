@@ -1,11 +1,13 @@
 package com.szelestamas.bookstorebackend.api.user.web;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.szelestamas.bookstorebackend.api.user.UserRole;
 import com.szelestamas.bookstorebackend.api.user.domain.User;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-public record SignUpDto(@NotBlank String login,@NotBlank String password,@NotBlank String firstName,@NotBlank String lastName, String role) {
+public record SignUpDto(@JsonProperty("email") @NotBlank String login, @NotNull String password, @NotBlank String firstName, @NotBlank String lastName, String role) {
     public User convertTo() {
         return new User(login, null, firstName, lastName, UserRole.valueOf(role.toUpperCase()));
     }

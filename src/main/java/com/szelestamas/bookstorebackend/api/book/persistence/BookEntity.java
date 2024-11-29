@@ -40,7 +40,7 @@ public class BookEntity {
     private String shortDescription;
 
     @ElementCollection
-    @CollectionTable(name = "book_tags", joinColumns = @JoinColumn(name = "book_id"))
+    @CollectionTable(name = "books_tags", joinColumns = @JoinColumn(name = "book_id"))
     @Column(name = "tag")
     private Set<String> tags;
 

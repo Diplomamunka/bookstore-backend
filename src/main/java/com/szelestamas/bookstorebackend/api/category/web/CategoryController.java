@@ -45,11 +45,17 @@ public class CategoryController {
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdCategory.id()).toUri()).body(CategoryResource.of(createdCategory));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<CategoryResource> updateCategory(@PathVariable Long id, @RequestBody @Valid CategoryDto categoryDto) {
+        Category updatedCategory = categoryService.update(id, categoryDto.convertTo());
+        return ResponseEntity.ok(CategoryResource.of(updatedCategory));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteById(id);
-
         return ResponseEntity.noContent().build();
     }
 
@@ -58,7 +64,6 @@ public class CategoryController {
     @Transactional
     public ResponseEntity<Void> deleteBooksByCategory(@PathVariable Long id) {
         List<Book> books = categoryService.getAllBooks(id);
-
         try {
             for (Book book : books) {
                 bookService.deleteById(book.id());

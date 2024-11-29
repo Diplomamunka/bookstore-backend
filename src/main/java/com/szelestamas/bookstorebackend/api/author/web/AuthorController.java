@@ -56,7 +56,6 @@ public class AuthorController {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<Void> deleteAuthor(@PathVariable Long id) {
         authorService.deleteById(id);
-
         return ResponseEntity.noContent().build();
     }
 

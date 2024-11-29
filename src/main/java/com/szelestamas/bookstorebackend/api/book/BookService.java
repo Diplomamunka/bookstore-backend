@@ -45,6 +45,10 @@ public class BookService {
         return book.toBook();
     }
 
+    public List<Book> getAllBooksById(Iterable<Long> ids) {
+        return bookRepository.findAllById(ids).stream().map(BookEntity::toBook).toList();
+    }
+
     public Book newBook(Book book, Category category, List<Author> authors) {
         BookEntity createdBook = BookEntity.of(book, category, authors);
         BookEntity bookEntity = bookRepository.save(createdBook);
@@ -76,11 +80,18 @@ public class BookService {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = IOException.class)
     public void saveFile(InputStream file, long id, String name) throws IOException {
         BookEntity bookEntity = bookRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Book not found with id: " + id));
         if (!Files.exists(Path.of(uploadPath)))
             Files.createDirectories(Path.of(uploadPath));
+        Optional<Path> filePath = Files.find(Path.of(uploadPath), 1, (path, attr) ->
+            path.getFileName().toString().split("_")[0].equals(Long.toString(id)))
+                .findFirst();
+        if (filePath.isPresent()) {
+            Files.delete(filePath.get());
+        }
         String path = uploadPath + "/" + id + "_" + name;
         OutputStream out = new FileOutputStream(path);
         file.transferTo(out);

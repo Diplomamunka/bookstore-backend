@@ -20,6 +20,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final AuthService authService;
+    private final CorsConfig corsConfig;
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -30,9 +32,9 @@ public class SecurityConfig {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.userDetailsService(authService).passwordEncoder(passwordEncoder());
         AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
-        return http.csrf(AbstractHttpConfigurer::disable)
+        return http.cors(c -> c.configurationSource(corsConfig)).csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .logout(logout -> logout.logoutUrl("/api/auth/signout"))
+                .logout(logout -> logout.logoutUrl("/api/auth/signout").logoutSuccessUrl("/api/auth/login?logout"))
                 .authenticationManager(authenticationManager).httpBasic(Customizer.withDefaults()).build();
     }
 

@@ -1,6 +1,5 @@
 package com.szelestamas.bookstorebackend.api.category;
 
-import com.szelestamas.bookstorebackend.api.author.persistence.AuthorEntity;
 import com.szelestamas.bookstorebackend.api.book.domain.Book;
 import com.szelestamas.bookstorebackend.api.book.persistence.BookEntity;
 import com.szelestamas.bookstorebackend.api.category.domain.Category;
@@ -9,6 +8,7 @@ import com.szelestamas.bookstorebackend.api.category.persistence.CategoryReposit
 import com.szelestamas.bookstorebackend.core.ResourceAlreadyExistsException;
 import com.szelestamas.bookstorebackend.core.ResourceCannotBeDeletedException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,6 +44,15 @@ public class CategoryService {
             throw new ResourceAlreadyExistsException(category.name());
         CategoryEntity savedEntity = categoryRepository.save(CategoryEntity.of(category));
         return savedEntity.toCategory();
+    }
+
+    public Category update(long id, Category category) {
+        CategoryEntity categoryEntity = categoryRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Author not found with id: " + id));
+        if (categoryRepository.exists(Example.of(CategoryEntity.of(category))))
+            throw new ResourceAlreadyExistsException("Author already exists with the name: " + category.name());
+        categoryEntity.setName(category.name());
+        return categoryRepository.save(categoryEntity).toCategory();
     }
 
     public Category findById(long id) {

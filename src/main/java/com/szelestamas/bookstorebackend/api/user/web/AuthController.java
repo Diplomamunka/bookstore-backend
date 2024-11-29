@@ -24,6 +24,16 @@ import java.util.List;
 public class AuthController {
     private final AuthService authService;
 
+    @RequestMapping(value = "/auth/login", method = { RequestMethod.GET, RequestMethod.POST })
+    @PostAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<UserResource> login(@AuthenticationPrincipal UserEntity authenticatedUser) {
+        if (!(authenticatedUser == null)) {
+            User user = authenticatedUser.toUser();
+            return ResponseEntity.ok(UserResource.of(user));
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/profile")
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostAuthorize("returnObject.body.login() == authentication.name")
