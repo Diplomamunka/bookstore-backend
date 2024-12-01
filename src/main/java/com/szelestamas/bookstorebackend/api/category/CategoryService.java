@@ -48,9 +48,9 @@ public class CategoryService {
 
     public Category update(long id, Category category) {
         CategoryEntity categoryEntity = categoryRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Author not found with id: " + id));
+                .orElseThrow(() -> new NoSuchElementException("Category not found with id: " + id));
         if (categoryRepository.exists(Example.of(CategoryEntity.of(category))))
-            throw new ResourceAlreadyExistsException("Author already exists with the name: " + category.name());
+            throw new ResourceAlreadyExistsException("Category already exists with the name: " + category.name());
         categoryEntity.setName(category.name());
         return categoryRepository.save(categoryEntity).toCategory();
     }

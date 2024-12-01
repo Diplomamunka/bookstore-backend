@@ -1,7 +1,7 @@
 package com.szelestamas.bookstorebackend.core;
 
-import com.szelestamas.bookstorebackend.api.book.BookNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -10,12 +10,6 @@ import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class ErrorAdvice {
-    @ExceptionHandler(BookNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String bookNotFoundHandler(BookNotFoundException ex) {
-        return ex.getMessage();
-    }
-
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String noSuchElementHandler(NoSuchElementException ex) {return ex.getMessage();}
@@ -31,4 +25,8 @@ public class ErrorAdvice {
     @ExceptionHandler(NotEnoughAuthorization.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String notEnoughAuthorizationHandler(NotEnoughAuthorization ex) {return ex.getMessage();}
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String usernameNotFoundHandler(UsernameNotFoundException ex) {return ex.getMessage();}
 }
