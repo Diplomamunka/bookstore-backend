@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -62,6 +63,7 @@ public class BookService {
         bookEntity.setAuthors(authors.stream().map(AuthorEntity::of).collect(Collectors.toSet()));
         bookEntity.setShortDescription(book.shortDescription());
         bookEntity.setReleaseDate(book.releaseDate());
+        bookEntity.setTags(new HashSet<>(book.tags()));
         return bookRepository.save(bookEntity).toBook();
     }
 
