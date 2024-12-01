@@ -97,6 +97,20 @@ public class BookService {
         out.close();
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = IOException.class)
+    public void deleteImage(long id) throws IOException {
+        BookEntity bookEntity = bookRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Book not found with id: " + id));
+        Optional<Path> filePath = Files.find(Path.of(uploadPath), 1, (path, attr) ->
+                        path.getFileName().toString().split("_")[0].equals(Long.toString(id)))
+                .findFirst();
+        if (filePath.isPresent()) {
+            Files.delete(filePath.get());
+        }
+        bookEntity.setIcon(null);
+        bookRepository.save(bookEntity);
+    }
+
     public Resource getFileAsResource(long id) throws MalformedURLException {
         BookEntity book = bookRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Book not found with id: " + id));

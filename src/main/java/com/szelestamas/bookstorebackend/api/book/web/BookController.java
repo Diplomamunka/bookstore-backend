@@ -128,6 +128,17 @@ public class BookController {
         }
     }
 
+    @DeleteMapping("/{id}/image")
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<Void> deleteImage(@PathVariable Long id) {
+        try {
+            bookService.deleteImage(id);
+            return ResponseEntity.noContent().build();
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     private boolean isFileContentIsGood(String contentType) {
         return contentType.equals("image/jpeg") || contentType.equals("image/png") || contentType.equals("image/svg+xml")
                 || contentType.equals("image/webp");
