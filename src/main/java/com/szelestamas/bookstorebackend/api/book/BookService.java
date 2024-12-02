@@ -63,7 +63,8 @@ public class BookService {
         bookEntity.setAuthors(authors.stream().map(AuthorEntity::of).collect(Collectors.toSet()));
         bookEntity.setShortDescription(book.shortDescription());
         bookEntity.setReleaseDate(book.releaseDate());
-        bookEntity.setTags(new HashSet<>(book.tags()));
+        if (book.tags() != null)
+            bookEntity.setTags(new HashSet<>(book.tags()));
         return bookRepository.save(bookEntity).toBook();
     }
 
