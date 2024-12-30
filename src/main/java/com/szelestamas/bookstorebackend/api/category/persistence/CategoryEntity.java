@@ -10,10 +10,10 @@ import lombok.Setter;
 
 import java.util.Set;
 
-@Setter
-@Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "categories")
 public class CategoryEntity {

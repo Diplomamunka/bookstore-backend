@@ -36,10 +36,26 @@ public class AuthorService {
         return author.getBooks().stream().map(BookEntity::toBook).toList();
     }
 
-    public Author newAuthor(Author author) {
+    public Author findByFullName(String name) {
+        AuthorEntity author = authorRepository.findByFullName(name)
+                .orElseThrow(() -> new NoSuchElementException("Author not found: " + name));
+
+        return author.toAuthor();
+    }
+
+    public Author createAuthor(Author author) {
         if (authorRepository.findByFullName(author.fullName()).isPresent())
             throw new ResourceAlreadyExistsException(author.fullName());
         return authorRepository.save(AuthorEntity.of(author)).toAuthor();
+    }
+
+    public Author updateAuthor(long id, Author author) {
+        AuthorEntity authorEntity = authorRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Author not found with id: " + id));
+        if (authorRepository.exists(Example.of(AuthorEntity.of(author))))
+            throw new ResourceAlreadyExistsException("Author already exists with the name: " + author.fullName());
+        authorEntity.setFullName(author.fullName());
+        return authorRepository.save(authorEntity).toAuthor();
     }
 
     public void deleteById(long id) {
@@ -49,21 +65,5 @@ public class AuthorService {
         if (!author.get().getBooks().isEmpty())
             throw new ResourceCannotBeDeletedException("Author still have books, cannot delete it.");
         authorRepository.deleteById(id);
-    }
-
-    public Author update(long id, Author author) {
-        AuthorEntity authorEntity = authorRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Author not found with id: " + id));
-        if (authorRepository.exists(Example.of(AuthorEntity.of(author))))
-            throw new ResourceAlreadyExistsException("Author already exists with the name: " + author.fullName());
-        authorEntity.setFullName(author.fullName());
-        return authorRepository.save(authorEntity).toAuthor();
-    }
-
-    public Author findByFullName(String name) {
-        AuthorEntity author = authorRepository.findByFullName(name)
-                .orElseThrow(() -> new NoSuchElementException("Author not found: " + name));
-
-        return author.toAuthor();
     }
 }

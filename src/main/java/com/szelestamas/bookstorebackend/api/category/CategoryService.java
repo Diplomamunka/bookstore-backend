@@ -30,31 +30,6 @@ public class CategoryService {
         return category.getBooks().stream().map(BookEntity::toBook).toList();
     }
 
-    public void deleteById(long id) {
-        Optional<CategoryEntity> category = categoryRepository.findById(id);
-        if (category.isEmpty())
-            return;
-        if (!category.get().getBooks().isEmpty())
-            throw new ResourceCannotBeDeletedException("Category still have books, cannot delete it.");
-        categoryRepository.deleteById(id);
-    }
-
-    public Category newCategory(Category category) {
-        if (categoryRepository.findByName(category.name()).isPresent())
-            throw new ResourceAlreadyExistsException(category.name());
-        CategoryEntity savedEntity = categoryRepository.save(CategoryEntity.of(category));
-        return savedEntity.toCategory();
-    }
-
-    public Category update(long id, Category category) {
-        CategoryEntity categoryEntity = categoryRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Category not found with id: " + id));
-        if (categoryRepository.exists(Example.of(CategoryEntity.of(category))))
-            throw new ResourceAlreadyExistsException("Category already exists with the name: " + category.name());
-        categoryEntity.setName(category.name());
-        return categoryRepository.save(categoryEntity).toCategory();
-    }
-
     public Category findById(long id) {
         CategoryEntity category = categoryRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Category not found with id: " + id));
@@ -65,5 +40,30 @@ public class CategoryService {
         CategoryEntity category = categoryRepository.findByName(name)
                 .orElseThrow(() -> new NoSuchElementException("Category not found: " + name));
         return category.toCategory();
+    }
+
+    public Category createCategory(Category category) {
+        if (categoryRepository.findByName(category.name()).isPresent())
+            throw new ResourceAlreadyExistsException(category.name());
+        CategoryEntity savedEntity = categoryRepository.save(CategoryEntity.of(category));
+        return savedEntity.toCategory();
+    }
+
+    public Category updateCategory(long id, Category category) {
+        CategoryEntity categoryEntity = categoryRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Category not found with id: " + id));
+        if (categoryRepository.exists(Example.of(CategoryEntity.of(category))))
+            throw new ResourceAlreadyExistsException("Category already exists with the name: " + category.name());
+        categoryEntity.setName(category.name());
+        return categoryRepository.save(categoryEntity).toCategory();
+    }
+
+    public void deleteById(long id) {
+        Optional<CategoryEntity> category = categoryRepository.findById(id);
+        if (category.isEmpty())
+            return;
+        if (!category.get().getBooks().isEmpty())
+            throw new ResourceCannotBeDeletedException("Category still have books, cannot delete it.");
+        categoryRepository.deleteById(id);
     }
 }

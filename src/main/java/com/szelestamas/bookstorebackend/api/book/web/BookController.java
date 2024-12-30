@@ -38,12 +38,12 @@ public class BookController {
     private final AuthService authService;
 
     @GetMapping
-    public ResponseEntity<List<BookResource>> getAllBooks() {
+    public ResponseEntity<List<BookResource>> getAll() {
         return ResponseEntity.ok(bookService.getAllBooks().stream().map(BookResource::of).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BookResource> getBookById(@PathVariable Long id) {
+    public ResponseEntity<BookResource> findById(@PathVariable Long id) {
         return ResponseEntity.ok(BookResource.of(bookService.getBookById(id)));
     }
 
@@ -69,10 +69,10 @@ public class BookController {
 
     @PostMapping
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<BookResource> newBook(@RequestBody @Valid BookDto book) {
+    public ResponseEntity<BookResource> create(@RequestBody @Valid BookDto book) {
         List<Author> authors = findOrCreateAuthors(book.authors());
         Category category = categoryService.findByName(book.category().name());
-        Book createdBook = bookService.newBook(book.convertTo(), category, authors);
+        Book createdBook = bookService.createBook(book.convertTo(), category, authors);
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdBook.id()).toUri()).body(BookResource.of(createdBook));
     }
 
@@ -102,7 +102,7 @@ public class BookController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<BookResource> updateBook(@PathVariable Long id, @RequestBody @Valid BookDto book) {
+    public ResponseEntity<BookResource> update(@PathVariable Long id, @RequestBody @Valid BookDto book) {
         List<Author> authors = findOrCreateAuthors(book.authors());
         Category category = categoryService.findByName(book.category().name());
         Book updatedBook = bookService.updateBook(id, book.convertTo(), category, authors);
@@ -119,7 +119,7 @@ public class BookController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {
             bookService.deleteById(id);
             return ResponseEntity.noContent().build();
@@ -149,7 +149,7 @@ public class BookController {
             try {
                 return authorService.findByFullName(author.fullName());
             } catch (NoSuchElementException e) {
-                return authorService.newAuthor(author.convertTo());
+                return authorService.createAuthor(author.convertTo());
             }
         }).toList();
     }

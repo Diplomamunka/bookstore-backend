@@ -40,21 +40,21 @@ public class AuthorController {
 
     @PostMapping
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<AuthorResource> newAuthor(@RequestBody @Valid AuthorDto authorDto) {
-        Author createdAuthor = authorService.newAuthor(authorDto.convertTo());
+    public ResponseEntity<AuthorResource> create(@RequestBody @Valid AuthorDto authorDto) {
+        Author createdAuthor = authorService.createAuthor(authorDto.convertTo());
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdAuthor.id()).toUri()).body(AuthorResource.of(createdAuthor));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<AuthorResource> updateAuthor(@PathVariable Long id, @RequestBody @Valid AuthorDto authorDto) {
-        Author updatedAuthor = authorService.update(id, authorDto.convertTo());
+    public ResponseEntity<AuthorResource> update(@PathVariable Long id, @RequestBody @Valid AuthorDto authorDto) {
+        Author updatedAuthor = authorService.updateAuthor(id, authorDto.convertTo());
         return ResponseEntity.ok(AuthorResource.of(updatedAuthor));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<Void> deleteAuthor(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         authorService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -62,7 +62,7 @@ public class AuthorController {
     @DeleteMapping("/{id}/books")
     @PreAuthorize("hasRole('STAFF')")
     @Transactional
-    public ResponseEntity<Void> deleteBooksByAuthor(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteBooksBy(@PathVariable Long id) {
         List<Book> books = authorService.getAllBooks(id);
         try {
             for (Book book : books) {

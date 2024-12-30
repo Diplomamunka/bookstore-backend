@@ -1,5 +1,4 @@
 package com.szelestamas.bookstorebackend.api.user;
-
 import com.szelestamas.bookstorebackend.api.author.domain.Author;
 import com.szelestamas.bookstorebackend.api.book.domain.Book;
 import com.szelestamas.bookstorebackend.api.book.persistence.BookEntity;
@@ -41,11 +40,10 @@ public class AuthService implements UserDetailsService {
         return userRepository.findAll().stream().map(UserEntity::toUser).toList();
     }
 
-    public void deleteUser(String login) {
-        Optional<UserEntity> user = userRepository.findById(login);
-        if (user.isPresent() && user.get().getUserRole() == UserRole.ADMIN)
-            throw new NotEnoughAuthorization("Delete admin" + user.get().getFirstName());
-        userRepository.deleteById(login);
+    public List<Book> getBookmarks(String login) {
+        UserEntity user = userRepository.findById(login)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + login));
+        return user.getBookmarks().stream().map(BookEntity::toBook).toList();
     }
 
     public User updateUser(String login, User user) {
@@ -58,12 +56,6 @@ public class AuthService implements UserDetailsService {
         return userRepository.save(userEntity).toUser();
     }
 
-    public List<Book> getBookmarks(String login) {
-        UserEntity user = userRepository.findById(login)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + login));
-        return user.getBookmarks().stream().map(BookEntity::toBook).toList();
-    }
-
     public List<Book> addBookmark(String login, Book book, Category category, List<Author> authors) {
         UserEntity user = userRepository.findById(login)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + login));
@@ -72,6 +64,13 @@ public class AuthService implements UserDetailsService {
         user.setBookmarks(bookmarks);
         userRepository.save(user);
         return bookmarks.stream().map(BookEntity::toBook).toList();
+    }
+
+    public void deleteByLogin(String login) {
+        Optional<UserEntity> user = userRepository.findById(login);
+        if (user.isPresent() && user.get().getUserRole() == UserRole.ADMIN)
+            throw new NotEnoughAuthorization("Delete admin" + user.get().getFirstName());
+        userRepository.deleteById(login);
     }
 
     public void deleteBookmark(String login, long id) {

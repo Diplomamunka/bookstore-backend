@@ -24,37 +24,37 @@ public class CategoryController {
     private final BookService bookService;
 
     @GetMapping
-    public ResponseEntity<List<CategoryResource>> getAllCategories() {
+    public ResponseEntity<List<CategoryResource>> getAll() {
         return ResponseEntity.ok(categoryService.getAllCategories().stream().map(CategoryResource::of).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResource> getCategory(@PathVariable Long id) {
+    public ResponseEntity<CategoryResource> findById(@PathVariable Long id) {
         return ResponseEntity.ok(CategoryResource.of(categoryService.findById(id)));
     }
 
     @GetMapping("/{id}/books")
-    public ResponseEntity<List<BookResource>> getBooksByCategory(@PathVariable Long id) {
+    public ResponseEntity<List<BookResource>> getAllBooks(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.getAllBooks(id).stream().map(BookResource::of).toList());
     }
 
     @PostMapping
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<CategoryResource> newCategory(@RequestBody @Valid CategoryDto category) {
-        Category createdCategory = categoryService.newCategory(category.convertTo());
+    public ResponseEntity<CategoryResource> create(@RequestBody @Valid CategoryDto category) {
+        Category createdCategory = categoryService.createCategory(category.convertTo());
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdCategory.id()).toUri()).body(CategoryResource.of(createdCategory));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<CategoryResource> updateCategory(@PathVariable Long id, @RequestBody @Valid CategoryDto categoryDto) {
-        Category updatedCategory = categoryService.update(id, categoryDto.convertTo());
+    public ResponseEntity<CategoryResource> update(@PathVariable Long id, @RequestBody @Valid CategoryDto categoryDto) {
+        Category updatedCategory = categoryService.updateCategory(id, categoryDto.convertTo());
         return ResponseEntity.ok(CategoryResource.of(updatedCategory));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         categoryService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

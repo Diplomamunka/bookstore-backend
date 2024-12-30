@@ -46,7 +46,7 @@ public class BookService {
         return book.toBook();
     }
 
-    public Book newBook(Book book, Category category, List<Author> authors) {
+    public Book createBook(Book book, Category category, List<Author> authors) {
         BookEntity createdBook = BookEntity.of(book, category, authors);
         BookEntity bookEntity = bookRepository.save(createdBook);
         return bookEntity.toBook();

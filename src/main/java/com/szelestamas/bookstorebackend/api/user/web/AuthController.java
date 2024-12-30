@@ -42,6 +42,12 @@ public class AuthController {
         return ResponseEntity.ok(UserResource.of(user));
     }
 
+    @GetMapping("/users/{login}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResource> findByLogin(@PathVariable String login) {
+        return ResponseEntity.ok(UserResource.of(((UserEntity)authService.loadUserByUsername(login)).toUser()));
+    }
+
     @GetMapping("/profile/bookmarks")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<BookResource>> getBookmarks(@AuthenticationPrincipal UserEntity authenticatedPrincipal) {
@@ -51,14 +57,8 @@ public class AuthController {
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResource>> getAllUsers() {
+    public ResponseEntity<List<UserResource>> getAll() {
         return ResponseEntity.ok(authService.getAllUsers().stream().map(UserResource::of).toList());
-    }
-
-    @GetMapping("/users/{login}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResource> getUser(@PathVariable String login) {
-        return ResponseEntity.ok(UserResource.of(((UserEntity)authService.loadUserByUsername(login)).toUser()));
     }
 
     @PostMapping("/auth/signup")
@@ -85,7 +85,7 @@ public class AuthController {
     @PutMapping("/profile/update")
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostAuthorize("returnObject.body.login() == authentication.name")
-    public ResponseEntity<UserResource> updateUser(@RequestBody @Valid SignUpDto signUpDto, @AuthenticationPrincipal UserEntity authenticatedPrincipal) {
+    public ResponseEntity<UserResource> update(@RequestBody @Valid SignUpDto signUpDto, @AuthenticationPrincipal UserEntity authenticatedPrincipal) {
         User user = authenticatedPrincipal.toUser();
         User newUser = signUpDto.convertFromUser(user);
         return ResponseEntity.ok(UserResource.of(authService.updateUser(user.login(), newUser)));
@@ -94,14 +94,14 @@ public class AuthController {
     @PutMapping("/users/{login}")
     @PreAuthorize("hasRole('ADMIN')")
     @PostAuthorize("returnObject.body.login() == #l and #l == #u.login()")
-    public ResponseEntity<UserResource> updateUser(@PathVariable @P("l") String login, @RequestBody @Valid @P("u") SignUpDto user) {
+    public ResponseEntity<UserResource> update(@PathVariable @P("l") String login, @RequestBody @Valid @P("u") SignUpDto user) {
         return ResponseEntity.ok(UserResource.of(authService.updateUser(login, user.convertTo())));
     }
 
     @DeleteMapping("/users/{login}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable String login) {
-        authService.deleteUser(login);
+    public ResponseEntity<Void> delete(@PathVariable String login) {
+        authService.deleteByLogin(login);
         return ResponseEntity.noContent().build();
     }
 }
